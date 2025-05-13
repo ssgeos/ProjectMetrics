@@ -86,4 +86,5 @@ MLGPL License (see LICENSE file).
 
 ## Screenshots
 
-![Metrics Dialog](screenshots/projectmetrics.png)
+![Metrics Dialog](screenshot/projectmetrics.png)
+

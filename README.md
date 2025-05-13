@@ -83,3 +83,7 @@ MLGPL License (see LICENSE file).
 * Author: [Frank Hoogerbeets]
 * GitHub: https://github.com/ssgeos
 * Questions? Post on the Lazarus Forum: https://forum.lazarus.freepascal.org
+
+## Screenshots
+
+![Metrics Dialog](screenshots/projectmetrics.png)

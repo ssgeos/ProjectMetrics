@@ -1,0 +1,19 @@
+# Lazarus compiled files
+*.o
+*.ppu
+*.compiled
+*.lrs
+*.or
+*.res
+lib/
+backup/
+*.bak
+*.~*
+
+# Lazarus IDE temporary files
+*.lps
+*.lpk~
+
+# OS-specific
+.DS_Store
+Thumbs.db

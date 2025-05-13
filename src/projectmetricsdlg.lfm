@@ -1,0 +1,83 @@
+object foProjectMetrics: TfoProjectMetrics
+  Left = 671
+  Height = 545
+  Top = 246
+  Width = 750
+  BorderIcons = [biSystemMenu]
+  BorderStyle = bsDialog
+  Caption = 'Project Metrics'
+  ClientHeight = 545
+  ClientWidth = 750
+  OnCreate = FormCreate
+  Position = poScreenCenter
+  LCLVersion = '3.2.0.0'
+  object btClose: TButton
+    Left = 653
+    Height = 25
+    Top = 512
+    Width = 88
+    Caption = 'Close'
+    TabOrder = 0
+    OnClick = btCloseClick
+  end
+  object pcProjectMetrics: TPageControl
+    Left = 8
+    Height = 496
+    Top = 8
+    Width = 733
+    ActivePage = tsUsedUnits
+    TabIndex = 0
+    TabOrder = 1
+    object tsUsedUnits: TTabSheet
+      Caption = 'Used Units'
+      ClientHeight = 457
+      ClientWidth = 727
+      object mmUsedUnits: TMemo
+        Left = 0
+        Height = 464
+        Top = 0
+        Width = 733
+        ReadOnly = True
+        ScrollBars = ssAutoBoth
+        TabOrder = 0
+        WordWrap = False
+      end
+    end
+    object tsInspectorUnits: TTabSheet
+      Caption = 'Inspector Units'
+      ClientHeight = 457
+      ClientWidth = 727
+      object mmInspectorUnits: TMemo
+        Left = 0
+        Height = 464
+        Top = 0
+        Width = 734
+        ReadOnly = True
+        ScrollBars = ssAutoBoth
+        TabOrder = 0
+        WordWrap = False
+      end
+    end
+  end
+  object chWordWrap: TCheckBox
+    Left = 16
+    Height = 32
+    Top = 512
+    Width = 106
+    Caption = 'Word wrap'
+    TabOrder = 2
+    OnChange = chWordWrapChange
+  end
+  object btCopyToClipboard: TButton
+    Left = 136
+    Height = 25
+    Hint = 'Copy selected page to clipboard.'
+    Top = 512
+    Width = 88
+    Caption = 'Copy'
+    ParentShowHint = False
+    ShowHint = True
+    TabOrder = 3
+    OnClick = btCopyToClipboardClick
+  end
+end

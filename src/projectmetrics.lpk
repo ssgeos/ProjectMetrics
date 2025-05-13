@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <Package Version="5">
+    <Name Value="projectmetrics"/>
+    <Type Value="DesignTime"/>
+    <Author Value="Frank Hoogerbeets"/>
+    <CompilerOptions>
+      <Version Value="11"/>
+      <SearchPaths>
+        <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
+      </SearchPaths>
+      <CodeGeneration>
+        <Optimizations>
+          <OptimizationLevel Value="2"/>
+        </Optimizations>
+      </CodeGeneration>
+      <Linking>
+        <Debugging>
+          <RunWithoutDebug Value="True"/>
+        </Debugging>
+      </Linking>
+    </CompilerOptions>
+    <Description Value="Reports how many code lines, comment lines and empty lines are in the project files. "/>
+    <License Value="MLGPL"/>
+    <Version Major="1"/>
+    <Files>
+      <Item>
+        <Filename Value="uprojectmetrics.pas"/>
+        <HasRegisterProc Value="True"/>
+        <UnitName Value="uProjectMetrics"/>
+      </Item>
+      <Item>
+        <Filename Value="projectmetricsdlg.pas"/>
+        <Type Value="Virtual Unit"/>
+        <UnitName Value="ProjectMetricsDlg"/>
+      </Item>
+    </Files>
+    <RequiredPkgs>
+      <Item>
+        <PackageName Value="IDEIntf"/>
+      </Item>
+      <Item>
+        <PackageName Value="LCL"/>
+      </Item>
+      <Item>
+        <PackageName Value="FCL"/>
+      </Item>
+    </RequiredPkgs>
+    <UsageOptions>
+      <UnitPath Value="$(PkgOutDir)"/>
+    </UsageOptions>
+    <PublishOptions>
+      <Version Value="2"/>
+      <UseFileFilters Value="True"/>
+    </PublishOptions>
+  </Package>
+</CONFIG>

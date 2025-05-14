@@ -1,83 +1,110 @@
 object foProjectMetrics: TfoProjectMetrics
-  Left = 671
-  Height = 545
-  Top = 246
-  Width = 750
-  BorderIcons = [biSystemMenu]
-  BorderStyle = bsDialog
+  Left = 557
+  Height = 450
+  Top = 244
+  Width = 870
+  BorderIcons = [biSystemMenu, biMaximize]
   Caption = 'Project Metrics'
-  ClientHeight = 545
-  ClientWidth = 750
+  ClientHeight = 450
+  ClientWidth = 870
   OnCreate = FormCreate
   Position = poScreenCenter
   LCLVersion = '3.2.0.0'
   object btClose: TButton
-    Left = 653
+    Left = 773
     Height = 25
-    Top = 512
+    Top = 417
     Width = 88
+    Anchors = [akRight, akBottom]
     Caption = 'Close'
     TabOrder = 0
     OnClick = btCloseClick
   end
   object pcProjectMetrics: TPageControl
+    AnchorSideRight.Side = asrBottom
+    AnchorSideBottom.Side = asrBottom
     Left = 8
-    Height = 496
+    Height = 408
     Top = 8
-    Width = 733
-    ActivePage = tsUsedUnits
-    TabIndex = 0
+    Width = 853
+    ActivePage = tsInspectorUnits
+    Anchors = [akTop, akLeft, akRight, akBottom]
+    TabIndex = 1
     TabOrder = 1
     object tsUsedUnits: TTabSheet
       Caption = 'Used Units'
-      ClientHeight = 457
-      ClientWidth = 727
-      object mmUsedUnits: TMemo
+      ClientHeight = 369
+      ClientWidth = 847
+      object sgUsedUnits: TStringGrid
+        AnchorSideRight.Side = asrBottom
+        AnchorSideBottom.Side = asrBottom
         Left = 0
-        Height = 464
+        Height = 370
         Top = 0
-        Width = 733
-        ReadOnly = True
-        ScrollBars = ssAutoBoth
+        Width = 850
+        Anchors = [akTop, akLeft, akRight, akBottom]
+        ColCount = 7
+        DefaultColWidth = 103
+        FixedCols = 0
+        HeaderHotZones = []
+        HeaderPushZones = []
+        Options = [goVertLine, goHorzLine, goRangeSelect, goColSizing, goRowSelect, goSmoothScroll]
+        RowCount = 2
         TabOrder = 0
-        WordWrap = False
+        ColWidths = (
+          125
+          125
+          125
+          125
+          125
+          125
+          124
+        )
       end
     end
     object tsInspectorUnits: TTabSheet
       Caption = 'Inspector Units'
-      ClientHeight = 457
-      ClientWidth = 727
-      object mmInspectorUnits: TMemo
+      ClientHeight = 369
+      ClientWidth = 847
+      object sgInspectorUnits: TStringGrid
+        AnchorSideRight.Side = asrBottom
+        AnchorSideBottom.Side = asrBottom
         Left = 0
-        Height = 464
+        Height = 370
         Top = 0
-        Width = 734
-        ReadOnly = True
-        ScrollBars = ssAutoBoth
+        Width = 850
+        Anchors = [akTop, akLeft, akRight, akBottom]
+        ColCount = 7
+        DefaultColWidth = 103
+        FixedCols = 0
+        HeaderHotZones = []
+        HeaderPushZones = []
+        Options = [goVertLine, goHorzLine, goRangeSelect, goColSizing, goRowSelect, goSmoothScroll]
+        RowCount = 2
         TabOrder = 0
-        WordWrap = False
+        ColWidths = (
+          125
+          125
+          125
+          125
+          125
+          125
+          124
+        )
       end
     end
   end
-  object chWordWrap: TCheckBox
-    Left = 16
-    Height = 32
-    Top = 512
-    Width = 106
-    Caption = 'Word wrap'
-    TabOrder = 2
-    OnChange = chWordWrapChange
-  end
   object btCopyToClipboard: TButton
-    Left = 136
+    Left = 672
     Height = 25
-    Hint = 'Copy selected page to clipboard.'
-    Top = 512
+    Hint = 'Copy selected page content to clipboard.'
+    Top = 417
     Width = 88
+    Anchors = [akRight, akBottom]
     Caption = 'Copy'
     ParentShowHint = False
     ShowHint = True
-    TabOrder = 3
+    TabOrder = 2
     OnClick = btCopyToClipboardClick
   end
 end

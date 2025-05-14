@@ -22,7 +22,7 @@
     </CompilerOptions>
     <Description Value="Reports how many code lines, comment lines and empty lines are in the project files. "/>
     <License Value="MLGPL"/>
-    <Version Major="1"/>
+    <Version Major="1" Minor="1" Build="38"/>
     <Files>
       <Item>
         <Filename Value="uprojectmetrics.pas"/>
@@ -31,7 +31,6 @@
       </Item>
       <Item>
         <Filename Value="projectmetricsdlg.pas"/>
-        <Type Value="Virtual Unit"/>
         <UnitName Value="ProjectMetricsDlg"/>
       </Item>
     </Files>

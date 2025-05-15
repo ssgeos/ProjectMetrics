@@ -44,12 +44,6 @@ type
     LfmFilesTotal: TSourceFile;
   end;
 
-  // interposer class overrides DrawCell
-  TStringGrid = class(Grids.TStringGrid)
-    protected
-    procedure DrawCell(ACol, ARow: Longint; ARect: TRect; AState: TGridDrawState); override;
-  end;
-
   { TfoProjectMetrics }
 
   TfoProjectMetrics = class(TForm)
@@ -63,6 +57,8 @@ type
     procedure btCloseClick(Sender: TObject);
     procedure btCopyToClipboardClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
+    procedure GridPrepareCanvas(Sender: TObject; aCol, aRow: Integer;
+      aState: TGridDrawState);
   private
     CountLineStatus: integer;
     MetricsPerFile: TStringList;
@@ -79,23 +75,6 @@ type
   end;
 
 implementation
-
-// interposer class to right-align cell text
-procedure TStringGrid.DrawCell(ACol, ARow: Integer; ARect: TRect; AState: TGridDrawState);
-var
-  s: string;
-  a: integer;
-begin
-  // just not the first column
-  if (ACol > 0) then
-    begin
-      s := Cells[ACol, ARow];
-      a := ColWidths[ACol] - Canvas.TextWidth(s);
-      Canvas.TextRect(ARect, ARect.Left + a, ARect.Top + 2, s);
-    end
-  else
-    Canvas.TextRect(ARect, ARect.Left + 2, ARect.Top + 2, Cells[ACol, ARow]);
-end;
 
 {$R *.lfm}
 
@@ -380,6 +359,19 @@ begin
   sgInspectorUnits.Font.Name := GRID_FONT_NAME;
   sgInspectorUnits.Font.Size := GRID_FONT_SIZE;
   pcProjectMetrics.ActivePageIndex := 0;
+end;
+
+procedure TfoProjectMetrics.GridPrepareCanvas(Sender: TObject;
+  aCol, aRow: Integer; aState: TGridDrawState);
+var
+  grid: TStringGrid;
+  textStyle: TTextStyle;
+begin
+  grid := Sender as TStringGrid;
+  textStyle := grid.Canvas.TextStyle;
+  if aCol > 0 then
+    textStyle.Alignment := taRightJustify;
+  grid.Canvas.TextStyle := textStyle;
 end;
 
 procedure TfoProjectMetrics.Analyze(AUnits, AInspectorUnits: TStrings);

@@ -7,9 +7,9 @@ object foProjectMetrics: TfoProjectMetrics
   Caption = 'Project Metrics'
   ClientHeight = 450
   ClientWidth = 870
-  OnCreate = FormCreate
   Position = poScreenCenter
-  LCLVersion = '3.2.0.0'
+  LCLVersion = '4.99.0.0'
+  OnCreate = FormCreate
   object btClose: TButton
     Left = 773
     Height = 25
@@ -33,24 +33,26 @@ object foProjectMetrics: TfoProjectMetrics
     TabOrder = 1
     object tsUsedUnits: TTabSheet
       Caption = 'Used Units'
-      ClientHeight = 369
-      ClientWidth = 847
+      ClientHeight = 380
+      ClientWidth = 845
       object sgUsedUnits: TStringGrid
         AnchorSideRight.Side = asrBottom
         AnchorSideBottom.Side = asrBottom
         Left = 0
-        Height = 370
+        Height = 381
         Top = 0
-        Width = 850
+        Width = 848
         Anchors = [akTop, akLeft, akRight, akBottom]
         ColCount = 7
         DefaultColWidth = 103
         FixedCols = 0
+        Flat = True
         HeaderHotZones = []
         HeaderPushZones = []
-        Options = [goVertLine, goHorzLine, goRangeSelect, goColSizing, goRowSelect, goSmoothScroll]
+        Options = [goRangeSelect, goColSizing, goRowSelect, goThumbTracking, goSmoothScroll]
         RowCount = 2
         TabOrder = 0
+        OnPrepareCanvas = GridPrepareCanvas
         ColWidths = (
           125
           125
@@ -64,24 +66,26 @@ object foProjectMetrics: TfoProjectMetrics
     end
     object tsInspectorUnits: TTabSheet
       Caption = 'Inspector Units'
-      ClientHeight = 369
-      ClientWidth = 847
+      ClientHeight = 380
+      ClientWidth = 845
       object sgInspectorUnits: TStringGrid
         AnchorSideRight.Side = asrBottom
         AnchorSideBottom.Side = asrBottom
         Left = 0
-        Height = 370
+        Height = 381
         Top = 0
-        Width = 850
+        Width = 848
         Anchors = [akTop, akLeft, akRight, akBottom]
         ColCount = 7
         DefaultColWidth = 103
         FixedCols = 0
+        Flat = True
         HeaderHotZones = []
         HeaderPushZones = []
-        Options = [goVertLine, goHorzLine, goRangeSelect, goColSizing, goRowSelect, goSmoothScroll]
+        Options = [goRangeSelect, goColSizing, goRowSelect, goThumbTracking, goSmoothScroll]
         RowCount = 2
         TabOrder = 0
+        OnPrepareCanvas = GridPrepareCanvas
         ColWidths = (
           125
           125

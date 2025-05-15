@@ -26,7 +26,6 @@
     <Files>
       <Item>
         <Filename Value="uprojectmetrics.pas"/>
-        <HasRegisterProc Value="True"/>
         <UnitName Value="uProjectMetrics"/>
       </Item>
       <Item>

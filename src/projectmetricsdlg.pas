@@ -18,7 +18,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, StrUtils,
-  Grids, LCLProc, FileUtil, LazIDEIntf, ProjectIntf, Clipbrd, ComCtrls, Types;
+  Grids, LCLProc, FileUtil, Clipbrd, ComCtrls, Types;
 
 const
   {$ifdef Unix}
@@ -70,11 +70,12 @@ type
     InspectorUnits: TProjectUnits;
     procedure CountLinesInFile(const FileName: string; var Source: TSourceFile);
     procedure ScanProjectFile(const FileName: string; var prjUnits: TProjectUnits);
-    procedure ScanUsedUnits;
-    procedure ScanInspectorUnits;
+    procedure ScanUsedUnits(AList: TStrings);
+    procedure ScanInspectorUnits(AList: TStrings);
     procedure GetResults(prjUnits: TProjectUnits; var grid: TStringGrid);
     procedure InitializeGrid(grid: TStringGrid);
   public
+    procedure Analyze(AUnits, AInspectorUnits: TStrings);
   end;
 
 implementation
@@ -213,51 +214,40 @@ begin
     end;
 end;
 
-procedure TfoProjectMetrics.ScanUsedUnits;
+procedure TfoProjectMetrics.ScanUsedUnits(AList: TStrings);
 var
-  LazProject: TLazProject;
-  Units: TStrings;
-  i: integer;
+  i: Integer;
 begin
   InitializeGrid(sgUsedUnits);
   MetricsPerFile.Clear;
-  LazProject := LazarusIDE.ActiveProject;
-  if LazProject <> nil then
-    begin
-      Units := LazarusIDE.FindUnitsOfOwner(LazProject, [fuooListed, fuooUsed]);
-      try
-        for i := 0 to Units.Count - 1 do
-          ScanProjectFile(Units[i], UsedUnits);
-        GetResults(UsedUnits, sgUsedUnits);
-      finally
-        Units.Free;
-      end;
-    end
-  else
+
+  if (AList = nil) or (AList.Count = 0) then
+  begin
     sgUsedUnits.Cells[0, 1] := 'No active project.';
+    exit;
+  end;
+
+  for i := 0 to AList.Count - 1 do
+    ScanProjectFile(AList[i], UsedUnits);
+  GetResults(UsedUnits, sgUsedUnits);
 end;
 
-procedure TfoProjectMetrics.ScanInspectorUnits;
+procedure TfoProjectMetrics.ScanInspectorUnits(AList: TStrings);
 var
-  LazProject: TLazProject;
-  i: integer;
-  LazFile: TLazProjectFile;
+  i: Integer;
 begin
   InitializeGrid(sgInspectorUnits);
   MetricsPerFile.Clear;
-  LazProject := LazarusIDE.ActiveProject;
-  if LazProject <> nil then
-    begin
-      for i := 0 to LazProject.FileCount - 1 do
-        begin
-          LazFile := LazProject.Files[i];
-          if LazFile.IsPartOfProject then
-            ScanProjectFile(LazFile.FileName, InspectorUnits);
-        end;
-      GetResults(InspectorUnits, sgInspectorUnits);
-    end
-  else
+
+  if (AList = nil) or (AList.Count = 0) then
+  begin
     sgInspectorUnits.Cells[0, 1] := 'No active project.';
+    exit;
+  end;
+
+  for i := 0 to AList.Count - 1 do
+    ScanProjectFile(AList[i], InspectorUnits);
+  GetResults(InspectorUnits, sgInspectorUnits);
 end;
 
 procedure TfoProjectMetrics.InitializeGrid(grid: TStringGrid);
@@ -389,14 +379,15 @@ begin
   sgUsedUnits.Font.Size := GRID_FONT_SIZE;
   sgInspectorUnits.Font.Name := GRID_FONT_NAME;
   sgInspectorUnits.Font.Size := GRID_FONT_SIZE;
-
-  MetricsPerFile := TStringList.Create;
-
   pcProjectMetrics.ActivePageIndex := 0;
+end;
 
+procedure TfoProjectMetrics.Analyze(AUnits, AInspectorUnits: TStrings);
+begin
+  MetricsPerFile := TStringList.Create;
   try
-    ScanUsedUnits;
-    ScanInspectorUnits;
+    ScanUsedUnits(AUnits);
+    ScanInspectorUnits(AInspectorUnits);
   finally
     MetricsPerFile.Free;
   end;

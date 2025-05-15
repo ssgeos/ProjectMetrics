@@ -74,7 +74,7 @@ This is a Lazarus IDE extension that adds a "Project Metrics..." item to the Pro
   2. Add ProjectMetricsDlg.pas and .lfm to edit in the form designer.
   3. Copy files back to the package and rebuild.
 
-It was successfuly installed in the Lazarus IDE on Debian 12, Windows 7 and Windows 11.
+It was successfuly installed in Lazarus 3.2 on Debian 12 and Windows 7, and in Lazarus 4.0 on Windows 11.
 
 ## License
 

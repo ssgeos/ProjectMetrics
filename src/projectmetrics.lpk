@@ -26,6 +26,7 @@
     <Files>
       <Item>
         <Filename Value="uprojectmetrics.pas"/>
+        <HasRegisterProc Value="True"/>
         <UnitName Value="uProjectMetrics"/>
       </Item>
       <Item>
@@ -34,6 +35,9 @@
       </Item>
     </Files>
     <RequiredPkgs>
+      <Item>
+        <PackageName Value="TAChartLazarusPkg"/>
+      </Item>
       <Item>
         <PackageName Value="IDEIntf"/>
       </Item>

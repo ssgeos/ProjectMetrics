@@ -250,25 +250,66 @@ begin
 end;
 
 procedure TfoProjectMetrics.InitializeGrid(grid: TStringGrid);
+const
+  W = 110;
 begin
-  grid.ColCount := 7;
   grid.RowCount := 2;
   grid.FixedRows := 1;
   grid.FixedCols := 0;
-  grid.Cells[0, 0] := 'File Name';
-  grid.Cells[1, 0] := 'Non-Empty Lines';
-  grid.Cells[2, 0] := 'Code Lines';
-  grid.Cells[3, 0] := 'Comment Lines';
-  grid.Cells[4, 0] := 'Empty Lines';
-  grid.Cells[5, 0] := 'Comment %';
-  grid.Cells[6, 0] := 'Empty %';
-  grid.ColWidths[0] := 180; // Wider for file names
-  grid.ColWidths[1] := 110;
-  grid.ColWidths[2] := 110;
-  grid.ColWidths[3] := 110;
-  grid.ColWidths[4] := 110;
-  grid.ColWidths[5] := 110;
-  grid.ColWidths[6] := 110;
+  grid.Columns.Clear;
+  with grid.Columns.Add do
+  begin
+    Title.Caption := 'File Name';
+  end;
+  with grid.Columns.Add do
+  begin
+    Title.Caption := 'Non-Empty Lines';
+    Title.Alignment := taRightJustify;
+    Width := W;
+    SizePriority := 0;
+    Alignment := taRightJustify;
+  end;
+  with grid.Columns.Add do
+  begin
+    Title.Caption := 'Code Lines';
+    Title.Alignment := taRightJustify;
+    Width := W;
+    SizePriority := 0;
+    Alignment := taRightJustify;
+  end;
+  with grid.Columns.Add do
+  begin
+    Title.Caption := 'Comment Lines';
+    Title.Alignment := taRightJustify;
+    Width := W;
+    SizePriority := 0;
+    Alignment := taRightJustify;
+  end;
+  with grid.Columns.Add do
+  begin
+    Title.Caption := 'Empty Lines';
+    Title.Alignment := taRightJustify;
+    SizePriority := 0;
+    Width := W;
+    Alignment := taRightJustify;
+  end;
+  with grid.Columns.Add do
+  begin
+    Title.Caption := 'Comment %';
+    Title.Alignment := taRightJustify;
+    SizePriority := 0;
+    Width := W;
+    Alignment := taRightJustify;
+  end;
+  with grid.Columns.Add do
+  begin
+    Title.Caption := 'Empty %';
+    Title.Alignment := taRightJustify;
+    SizePriority := 0;
+    Width := W;
+    Alignment := taRightJustify;
+  end;
+  grid.AutoFillColumns := true;
 end;
 
 procedure TfoProjectMetrics.GetResults(prjUnits: TProjectUnits;

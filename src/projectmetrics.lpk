@@ -36,6 +36,9 @@
     </Files>
     <RequiredPkgs>
       <Item>
+        <PackageName Value="TAChartLazarusPkg"/>
+      </Item>
+      <Item>
         <PackageName Value="IDEIntf"/>
       </Item>
       <Item>

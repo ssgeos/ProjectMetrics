@@ -7,9 +7,9 @@ object foProjectMetrics: TfoProjectMetrics
   Caption = 'Project Metrics'
   ClientHeight = 450
   ClientWidth = 870
-  OnCreate = FormCreate
   Position = poScreenCenter
-  LCLVersion = '3.2.0.0'
+  LCLVersion = '4.99.0.0'
+  OnCreate = FormCreate
   object btClose: TButton
     Left = 773
     Height = 25
@@ -27,61 +27,104 @@ object foProjectMetrics: TfoProjectMetrics
     Height = 408
     Top = 8
     Width = 853
-    ActivePage = tsInspectorUnits
+    ActivePage = tsUsedUnits
     Anchors = [akTop, akLeft, akRight, akBottom]
-    TabIndex = 1
+    TabIndex = 0
     TabOrder = 1
+    OnChange = pcProjectMetricsChange
     object tsUsedUnits: TTabSheet
       Caption = 'Used Units'
-      ClientHeight = 369
-      ClientWidth = 847
+      ClientHeight = 380
+      ClientWidth = 845
       object sgUsedUnits: TStringGrid
-        AnchorSideRight.Side = asrBottom
-        AnchorSideBottom.Side = asrBottom
         Left = 0
-        Height = 370
+        Height = 380
         Top = 0
-        Width = 850
-        Anchors = [akTop, akLeft, akRight, akBottom]
-        ColCount = 7
+        Width = 845
+        Align = alClient
+        ColCount = 0
         DefaultColWidth = 103
         FixedCols = 0
+        FixedRows = 0
+        Flat = True
         HeaderHotZones = []
         HeaderPushZones = []
-        Options = [goVertLine, goHorzLine, goRangeSelect, goColSizing, goRowSelect, goSmoothScroll]
-        RowCount = 2
+        Options = [goRangeSelect, goColSizing, goRowSelect, goThumbTracking, goSmoothScroll]
+        RowCount = 0
         TabOrder = 0
-        ColWidths = (
-          125
-          125
-          125
-          125
-          125
-          125
-          124
+        OnPrepareCanvas = GridPrepareCanvas
+      end
+      object MetricsChart: TChart
+        Left = 64
+        Height = 194
+        Top = 104
+        Width = 244
+        AxisList = <        
+          item
+            Grid.Color = clSilver
+            Grid.Style = psSolid
+            Marks.LabelBrush.Style = bsClear
+            Minors = <>
+            Title.LabelFont.Orientation = 900
+            Title.LabelFont.Style = [fsBold]
+            Title.Visible = True
+            Title.Caption = 'Lines'
+            Title.LabelBrush.Style = bsClear
+          end        
+          item
+            Grid.Visible = False
+            TickLength = 0
+            Alignment = calBottom
+            Marks.Distance = 8
+            Marks.LabelBrush.Style = bsClear
+            Marks.RotationCenter = rcEdge
+            Minors = <            
+              item
+                Grid.Visible = False
+                Intervals.Count = 1
+                Intervals.MinLength = 5
+                Intervals.Options = [aipUseCount, aipUseMinLength]
+                TickLength = 4
+                Marks.LabelBrush.Style = bsClear
+              end>
+            Title.LabelBrush.Style = bsClear
+          end>
+        Legend.Alignment = laBottomCenter
+        Legend.ColumnCount = 3
+        Legend.Visible = True
+        Margins.Bottom = 0
+        Title.Text.Strings = (
+          'TAChart'
         )
+        Toolset = ChartToolset
+        Visible = False
+        object MetricsBarSeries: TBarSeries
+          Legend.Multiplicity = lmStyle
+          BarBrush.Color = clRed
+          Styles = ChartStyles
+        end
       end
     end
     object tsInspectorUnits: TTabSheet
       Caption = 'Inspector Units'
-      ClientHeight = 369
-      ClientWidth = 847
+      ClientHeight = 380
+      ClientWidth = 845
       object sgInspectorUnits: TStringGrid
-        AnchorSideRight.Side = asrBottom
-        AnchorSideBottom.Side = asrBottom
         Left = 0
-        Height = 370
+        Height = 380
         Top = 0
-        Width = 850
-        Anchors = [akTop, akLeft, akRight, akBottom]
+        Width = 845
+        Align = alClient
         ColCount = 7
         DefaultColWidth = 103
         FixedCols = 0
+        Flat = True
         HeaderHotZones = []
         HeaderPushZones = []
-        Options = [goVertLine, goHorzLine, goRangeSelect, goColSizing, goRowSelect, goSmoothScroll]
+        Options = [goRangeSelect, goColSizing, goRowSelect, goThumbTracking, goSmoothScroll]
         RowCount = 2
         TabOrder = 0
+        OnPrepareCanvas = GridPrepareCanvas
         ColWidths = (
           125
           125
@@ -106,5 +149,83 @@ object foProjectMetrics: TfoProjectMetrics
     ShowHint = True
     TabOrder = 2
     OnClick = btCopyToClipboardClick
+  end
+  object rbTable: TRadioButton
+    AnchorSideLeft.Control = pcProjectMetrics
+    AnchorSideTop.Control = btClose
+    AnchorSideTop.Side = asrCenter
+    Left = 8
+    Height = 19
+    Top = 420
+    Width = 47
+    Caption = 'Table'
+    Checked = True
+    TabOrder = 3
+    TabStop = True
+    OnChange = rbTableChange
+  end
+  object rbChart: TRadioButton
+    AnchorSideLeft.Control = rbTable
+    AnchorSideLeft.Side = asrBottom
+    AnchorSideTop.Control = btClose
+    AnchorSideTop.Side = asrCenter
+    Left = 71
+    Height = 19
+    Top = 420
+    Width = 47
+    BorderSpacing.Left = 16
+    Caption = 'Chart'
+    TabOrder = 4
+    OnChange = rbTableChange
+  end
+  object ChartStyles: TChartStyles
+    Styles = <    
+      item
+        Brush.Color = 8799488
+        Text = 'Code lines'
+      end    
+      item
+        Brush.Color = 934655
+        Text = 'Comment lines'
+      end    
+      item
+        Brush.Color = 2151423
+        Text = 'Empty lines'
+      end>
+    Left = 376
+    Top = 64
+  end
+  object lcsUsedUnits: TListChartSource
+    YCount = 3
+    Left = 75
+    Top = 64
+  end
+  object lcsInspectorUnits: TListChartSource
+    YCount = 3
+    Left = 199
+    Top = 64
+  end
+  object ChartToolset: TChartToolset
+    Left = 480
+    Top = 64
+    object DataPointHintTool: TDataPointHintTool
+      OnHint = DataPointHintToolHint
+      OnHintLocation = DataPointHintToolHintLocation
+      UseDefaultHintText = False
+    end
+    object MouseWheelZoomTool: TZoomMouseWheelTool
+      LimitToExtent = [zdLeft, zdUp, zdRight, zdDown]
+      ZoomFactor = 1.1
+      ZoomRatio = 0.909
+    end
+    object ZoomDragTool: TZoomDragTool
+      Shift = [ssLeft]
+      LimitToExtent = [zdLeft, zdUp, zdRight, zdDown]
+      Brush.Style = bsClear
+    end
+    object PanDragTool: TPanDragTool
+      Shift = [ssRight]
+      LimitToExtent = [pdLeft, pdUp, pdRight, pdDown]
+    end
   end
 end

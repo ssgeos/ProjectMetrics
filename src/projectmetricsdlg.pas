@@ -18,7 +18,8 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, Dialogs, StdCtrls, StrUtils,
-  Grids, LCLProc, FileUtil, LazIDEIntf, ProjectIntf, Clipbrd, ComCtrls, Types;
+  Grids, LCLProc, FileUtil, Clipbrd, ComCtrls, Types,
+  TAGraph, TASeries, TASources, TAStyles, TATools, TAChartUtils, TATextElements;
 
 const
   {$ifdef Unix}
@@ -44,25 +45,39 @@ type
     LfmFilesTotal: TSourceFile;
   end;
 
-  // interposer class overrides DrawCell
-  TStringGrid = class(Grids.TStringGrid)
-    protected
-    procedure DrawCell(ACol, ARow: Longint; ARect: TRect; AState: TGridDrawState); override;
-  end;
-
   { TfoProjectMetrics }
 
   TfoProjectMetrics = class(TForm)
     btClose: TButton;
     btCopyToClipboard: TButton;
+    ChartToolset: TChartToolset;
+    PanDragTool: TPanDragTool;
+    ZoomDragTool: TZoomDragTool;
+    MouseWheelZoomTool: TZoomMouseWheelTool;
+    DataPointHintTool: TDataPointHintTool;
+    lcsUsedUnits: TListChartSource;
+    lcsInspectorUnits: TListChartSource;
+    MetricsChart: TChart;
+    MetricsBarSeries: TBarSeries;
+    ChartStyles: TChartStyles;
     pcProjectMetrics: TPageControl;
+    rbChart: TRadioButton;
+    rbTable: TRadioButton;
     tsUsedUnits: TTabSheet;
     tsInspectorUnits: TTabSheet;
     sgUsedUnits: TStringGrid;
     sgInspectorUnits: TStringGrid;
     procedure btCloseClick(Sender: TObject);
     procedure btCopyToClipboardClick(Sender: TObject);
+    procedure DataPointHintToolHint(ATool: TDataPointHintTool; const APoint:
+      TPoint; var AHint: String);
+    procedure DataPointHintToolHintLocation(ATool: TDataPointHintTool; AHintSize
+      : TSize; var APoint: TPoint);
     procedure FormCreate(Sender: TObject);
+    procedure GridPrepareCanvas(Sender: TObject; aCol, aRow: Integer;
+      aState: TGridDrawState);
+    procedure pcProjectMetricsChange(Sender: TObject);
+    procedure rbTableChange(Sender: TObject);
   private
     CountLineStatus: integer;
     MetricsPerFile: TStringList;
@@ -70,31 +85,16 @@ type
     InspectorUnits: TProjectUnits;
     procedure CountLinesInFile(const FileName: string; var Source: TSourceFile);
     procedure ScanProjectFile(const FileName: string; var prjUnits: TProjectUnits);
-    procedure ScanUsedUnits;
-    procedure ScanInspectorUnits;
-    procedure GetResults(prjUnits: TProjectUnits; var grid: TStringGrid);
+    procedure ScanUsedUnits(AList: TStrings);
+    procedure ScanInspectorUnits(AList: TStrings);
+    procedure GetResults(prjUnits: TProjectUnits; var grid: TStringGrid; chartSource: TListChartSource);
     procedure InitializeGrid(grid: TStringGrid);
+    procedure InitializeChart;
   public
+    procedure Analyze(AUnits, AInspectorUnits: TStrings);
   end;
 
 implementation
-
-// interposer class to right-align cell text
-procedure TStringGrid.DrawCell(ACol, ARow: Integer; ARect: TRect; AState: TGridDrawState);
-var
-  s: string;
-  a: integer;
-begin
-  // just not the first column
-  if (ACol > 0) then
-    begin
-      s := Cells[ACol, ARow];
-      a := ColWidths[ACol] - Canvas.TextWidth(s);
-      Canvas.TextRect(ARect, ARect.Left + a, ARect.Top + 2, s);
-    end
-  else
-    Canvas.TextRect(ARect, ARect.Left + 2, ARect.Top + 2, Cells[ACol, ARow]);
-end;
 
 {$R *.lfm}
 
@@ -213,78 +213,109 @@ begin
     end;
 end;
 
-procedure TfoProjectMetrics.ScanUsedUnits;
+procedure TfoProjectMetrics.ScanUsedUnits(AList: TStrings);
 var
-  LazProject: TLazProject;
-  Units: TStrings;
-  i: integer;
+  i: Integer;
 begin
   InitializeGrid(sgUsedUnits);
   MetricsPerFile.Clear;
-  LazProject := LazarusIDE.ActiveProject;
-  if LazProject <> nil then
-    begin
-      Units := LazarusIDE.FindUnitsOfOwner(LazProject, [fuooListed, fuooUsed]);
-      try
-        for i := 0 to Units.Count - 1 do
-          ScanProjectFile(Units[i], UsedUnits);
-        GetResults(UsedUnits, sgUsedUnits);
-      finally
-        Units.Free;
-      end;
-    end
-  else
+
+  if (AList = nil) or (AList.Count = 0) then
+  begin
     sgUsedUnits.Cells[0, 1] := 'No active project.';
+    exit;
+  end;
+
+  for i := 0 to AList.Count - 1 do
+    ScanProjectFile(AList[i], UsedUnits);
+  GetResults(UsedUnits, sgUsedUnits, lcsUsedUnits);
 end;
 
-procedure TfoProjectMetrics.ScanInspectorUnits;
+procedure TfoProjectMetrics.ScanInspectorUnits(AList: TStrings);
 var
-  LazProject: TLazProject;
-  i: integer;
-  LazFile: TLazProjectFile;
+  i: Integer;
 begin
   InitializeGrid(sgInspectorUnits);
   MetricsPerFile.Clear;
-  LazProject := LazarusIDE.ActiveProject;
-  if LazProject <> nil then
-    begin
-      for i := 0 to LazProject.FileCount - 1 do
-        begin
-          LazFile := LazProject.Files[i];
-          if LazFile.IsPartOfProject then
-            ScanProjectFile(LazFile.FileName, InspectorUnits);
-        end;
-      GetResults(InspectorUnits, sgInspectorUnits);
-    end
-  else
+
+  if (AList = nil) or (AList.Count = 0) then
+  begin
     sgInspectorUnits.Cells[0, 1] := 'No active project.';
+    exit;
+  end;
+
+  for i := 0 to AList.Count - 1 do
+    ScanProjectFile(AList[i], InspectorUnits);
+  GetResults(InspectorUnits, sgInspectorUnits, lcsInspectorUnits);
 end;
 
 procedure TfoProjectMetrics.InitializeGrid(grid: TStringGrid);
+const
+  W = 110;
 begin
-  grid.ColCount := 7;
   grid.RowCount := 2;
   grid.FixedRows := 1;
   grid.FixedCols := 0;
-  grid.Cells[0, 0] := 'File Name';
-  grid.Cells[1, 0] := 'Non-Empty Lines';
-  grid.Cells[2, 0] := 'Code Lines';
-  grid.Cells[3, 0] := 'Comment Lines';
-  grid.Cells[4, 0] := 'Empty Lines';
-  grid.Cells[5, 0] := 'Comment %';
-  grid.Cells[6, 0] := 'Empty %';
-  grid.ColWidths[0] := 180; // Wider for file names
-  grid.ColWidths[1] := 110;
-  grid.ColWidths[2] := 110;
-  grid.ColWidths[3] := 110;
-  grid.ColWidths[4] := 110;
-  grid.ColWidths[5] := 110;
-  grid.ColWidths[6] := 110;
+  grid.Columns.Clear;
+  with grid.Columns.Add do
+  begin
+    Title.Caption := 'File Name';
+  end;
+  with grid.Columns.Add do
+  begin
+    Title.Caption := 'Non-Empty Lines';
+    Title.Alignment := taRightJustify;
+    Width := W;
+    SizePriority := 0;
+    Alignment := taRightJustify;
+  end;
+  with grid.Columns.Add do
+  begin
+    Title.Caption := 'Code Lines';
+    Title.Alignment := taRightJustify;
+    Width := W;
+    SizePriority := 0;
+    Alignment := taRightJustify;
+  end;
+  with grid.Columns.Add do
+  begin
+    Title.Caption := 'Comment Lines';
+    Title.Alignment := taRightJustify;
+    Width := W;
+    SizePriority := 0;
+    Alignment := taRightJustify;
+  end;
+  with grid.Columns.Add do
+  begin
+    Title.Caption := 'Empty Lines';
+    Title.Alignment := taRightJustify;
+    SizePriority := 0;
+    Width := W;
+    Alignment := taRightJustify;
+  end;
+  with grid.Columns.Add do
+  begin
+    Title.Caption := 'Comment %';
+    Title.Alignment := taRightJustify;
+    SizePriority := 0;
+    Width := W;
+    Alignment := taRightJustify;
+  end;
+  with grid.Columns.Add do
+  begin
+    Title.Caption := 'Empty %';
+    Title.Alignment := taRightJustify;
+    SizePriority := 0;
+    Width := W;
+    Alignment := taRightJustify;
+  end;
+  grid.AutoFillColumns := true;
 end;
 
-procedure TfoProjectMetrics.GetResults(prjUnits: TProjectUnits; var grid: TStringGrid);
+procedure TfoProjectMetrics.GetResults(prjUnits: TProjectUnits;
+  var grid: TStringGrid; chartSource: TListChartSource);
 var
-  i, Row: integer;
+  i, j, Row: integer;
   FileMetrics: array of string;
   SummaryLines: integer;
 begin
@@ -306,8 +337,12 @@ begin
           grid.Cells[6, 1] := FloatToStrF(PasFilesTotal.EmptyLines / (PasFilesTotal.NonEmptyLines + PasFilesTotal.EmptyLines) * 100, ffFixed, 1, 2);
         end;
 
+      // Prepare chart source
+      chartSource.Clear;
+
       // Populate file metrics
       Row := SummaryLines + 1;
+      j := 0;
       for i := 0 to MetricsPerFile.Count - 1 do
       begin
         if (MetricsPerFile[i].StartsWith('Could not open file') or
@@ -330,6 +365,12 @@ begin
               grid.Cells[5, Row] := FloatToStrF(StrToIntDef(FileMetrics[3], 0) / StrToIntDef(FileMetrics[1], 1) * 100, ffFixed, 1, 2);
               grid.Cells[6, Row] := FloatToStrF(StrToIntDef(FileMetrics[4], 0) / (StrToIntDef(FileMetrics[1], 1) + StrToIntDef(FileMetrics[4], 1)) * 100, ffFixed, 1, 2);
             end;
+          chartSource.AddXYList(
+            j,
+            [StrToInt(FileMetrics[2]), StrToInt(FileMetrics[3]), StrToInt(FileMetrics[4])],
+            FileMetrics[0]
+          );
+          Inc(j);
           Inc(Row);
         end;
       end;
@@ -383,20 +424,111 @@ begin
   end;
 end;
 
+procedure TfoProjectMetrics.DataPointHintToolHint(ATool: TDataPointHintTool;
+  const APoint: TPoint; var AHint: String);
+var
+  ser: TBarSeries;
+  nCode, nComments, nEmpty, nTotal: Double;
+begin
+  ser := ATool.Series as TBarSeries;
+  nCode := ser.YValues[ATool.PointIndex, 0];
+  nComments := ser.YValues[ATool.PointIndex, 1];
+  nEmpty := ser.YValues[ATool.PointIndex, 2];
+  nTotal := nCode + nComments + nEmpty;
+  AHint := Format(
+    '%s' + LineEnding +
+    '  %.0f code lines (%.0f%%)' + LineEnding +
+    '  %.0f comment lines (%.0f%%)' + LineEnding +
+    '  %.0f empty lines (%.0f%%)', [
+    ser.Source[ATool.PointIndex]^.Text,
+    nCode, nCode/nTotal * 100,
+    nComments, nComments/nTotal * 100,
+    nEmpty, nEmpty/nTotal * 100
+  ]);
+end;
+
+procedure TfoProjectMetrics.DataPointHintToolHintLocation(ATool:
+  TDataPointHintTool; AHintSize: TSize; var APoint: TPoint);
+begin
+  APoint.Y := APoint.Y - AHintSize.CY;
+end;
+
 procedure TfoProjectMetrics.FormCreate(Sender: TObject);
 begin
   sgUsedUnits.Font.Name := GRID_FONT_NAME;
   sgUsedUnits.Font.Size := GRID_FONT_SIZE;
   sgInspectorUnits.Font.Name := GRID_FONT_NAME;
   sgInspectorUnits.Font.Size := GRID_FONT_SIZE;
-
-  MetricsPerFile := TStringList.Create;
-
   pcProjectMetrics.ActivePageIndex := 0;
+end;
 
+procedure TfoProjectMetrics.GridPrepareCanvas(Sender: TObject;
+  aCol, aRow: Integer; aState: TGridDrawState);
+var
+  grid: TStringGrid;
+  textStyle: TTextStyle;
+begin
+exit;
+  grid := Sender as TStringGrid;
+  textStyle := grid.Canvas.TextStyle;
+  if aCol > 0 then
+    textStyle.Alignment := taRightJustify;
+  grid.Canvas.TextStyle := textStyle;
+end;
+
+procedure TfoProjectMetrics.pcProjectMetricsChange(Sender: TObject);
+begin
+  MetricsChart.Parent := pcProjectMetrics.ActivePage;
+  InitializeChart;
+end;
+
+procedure TfoProjectMetrics.rbTableChange(Sender: TObject);
+begin
+  InitializeChart;
+end;
+
+procedure TfoProjectMetrics.InitializeChart;
+var
+  grid: TStringGrid;
+  ext: TDoubleRect;
+begin
+  case pcProjectMetrics.ActivePageIndex of
+    0: begin
+         MetricsBarSeries.Source := lcsUsedUnits;
+         grid := sgUsedUnits;
+       end;
+    1: begin
+         MetricsBarSeries.Source := lcsInspectorUnits;
+         grid := sgInspectorUnits;
+       end;
+  end;
+  MetricsChart.BottomAxis.Marks.Source := MetricsBarSeries.Source;
+  MetricsChart.BottomAxis.Marks.Style := smsLabel;
+  MetricsChart.Align := alClient;
+  MetricsChart.Visible := rbChart.Checked;
+  grid.Visible := rbTable.Checked;
+  if MetricsBarSeries.Count > 20 then
+  begin
+    MetricsChart.BottomAxis.Marks.LabelFont.Orientation := 900;
+    MetricsChart.BottomAxis.Marks.RotationCenter := rcEdge;
+  end
+  else if MetricsBarSeries.Count > 5 then
+  begin
+    MetricsChart.BottomAxis.Marks.LabelFont.Orientation := 450;
+    MetricsChart.BottomAxis.Marks.RotationCenter := rcEdge;
+  end else
+  begin
+    MetricsChart.BottomAxis.Marks.LabelFont.Orientation := 0;
+    MetricsChart.BottomAxis.Marks.RotationCenter := rcCenter;
+  end;
+end;
+
+procedure TfoProjectMetrics.Analyze(AUnits, AInspectorUnits: TStrings);
+begin
+  MetricsPerFile := TStringList.Create;
   try
-    ScanUsedUnits;
-    ScanInspectorUnits;
+    ScanUsedUnits(AUnits);
+    ScanInspectorUnits(AInspectorUnits);
   finally
     MetricsPerFile.Free;
   end;

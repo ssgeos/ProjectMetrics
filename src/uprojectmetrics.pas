@@ -13,7 +13,7 @@ unit uProjectMetrics;
 
 interface
 
-uses Classes, SysUtils, LazIDEIntf, MenuIntf, ProjectMetricsDlg;
+uses Classes, SysUtils, LazIDEIntf, MenuIntf, ProjectIntf, ProjectMetricsDlg;
 
 procedure Register;
 
@@ -22,11 +22,31 @@ implementation
 procedure MyMenuItemClick(Sender: TObject);
 var
   fo: TfoProjectMetrics;
+  LazProject: TLazProject;
+  LazFile: TLazProjectFile;
+  Units: TStrings = nil;
+  InspectorUnits: TStrings = nil;
+  i: Integer;
 begin
   fo := TfoProjectMetrics.Create(nil);
   try
+    LazProject := LazarusIDE.ActiveProject;
+    if LazProject <> nil then
+    begin
+      Units := LazarusIDE.FindUnitsOfOwner(LazProject, [fuooListed, fuooUsed]);
+      InspectorUnits := TStringList.Create;
+      for i := 0 to LazProject.FileCount - 1 do
+      begin
+        LazFile := LazProject.Files[i];
+        if LazFile.IsPartOfProject then
+          InspectorUnits.Add(LazProject.Files[i].FileName);
+      end;
+    end;
+    fo.Analyze(Units, InspectorUnits);
     fo.ShowModal;
   finally
+    InspectorUnits.Free;
+    Units.Free;
     fo.Free;
   end;
 end;

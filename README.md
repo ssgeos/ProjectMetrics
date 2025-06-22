@@ -88,11 +88,12 @@ MLGPL License (see LICENSE file).
 
 ## Screenshots
 
+Debian 12
+
 ![Metrics Dialog](screenshots/projectmetrics.png)
-Linux
 
 ![Metrics Dialog Chart](screenshots/projectmetrics-chart.png)
-Linux Chart
+
+Windows 7
 
 ![Metrics Dialog](screenshots/projectmetrics_w7.jpg)
-Windows 7

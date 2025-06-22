@@ -91,5 +91,8 @@ MLGPL License (see LICENSE file).
 ![Metrics Dialog](screenshots/projectmetrics.png)
 Linux
 
+![Metrics Dialog Chart](screenshots/projectmetrics-chart.png)
+Linux Chart
+
 ![Metrics Dialog](screenshots/projectmetrics_w7.jpg)
 Windows 7
